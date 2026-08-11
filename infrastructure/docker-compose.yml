@@ -1,0 +1,54 @@
+
+version: "3.8"
+
+services:
+  # 1. PostgreSQL + pgvector for Relational State and RAG Memory
+  postgres_vector:
+    # We use a pre-built image that includes the pgvector extension.
+    image: pgvector/pgvector:pg16
+    container_name: companion_postgres
+    restart: always
+    ports:
+      # Expose to localhost for Spring Boot R2DBC connection
+      - "5432:5432"
+    environment:
+      # Security parameters for the database initialization
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      # Ensure data persistence across container restarts
+      - postgres_data:/var/lib/postgresql/data
+      # Initialize the pgvector extension automatically on startup
+      - ./infrastructure/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - companion_net
+
+  # 2. Redis Stack for Semantic Caching
+  redis_cache:
+    # Redis Stack includes RedisInsight (a web GUI) and core Redis modules (like RediSearch for vector caching).
+    image: redis/redis-stack:latest
+    container_name: companion_redis
+    restart: always
+    ports:
+      # Core Redis port for Java application caching
+      - "6379:6379"
+      # RedisInsight GUI port (Access via http://localhost:8001)
+      - "8001:8001"
+    volumes:
+      # Persist the cache data locally
+      - redis_data:/data
+    networks:
+      - companion_net
+
+# Define persistent volumes mapping to your local host machine
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Isolate the microservices on their own internal Docker network
+networks:
+  companion_net:
+    driver: bridge
