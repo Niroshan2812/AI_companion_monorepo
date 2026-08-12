@@ -64,8 +64,9 @@ public class JwtValidator {
     public void generateDevToken(){
         long expirationTime = System.currentTimeMillis() + (1000 * 60 * 60 * 24);
 
+        String validUuid = java.util.UUID.randomUUID().toString();
         String devToken = Jwts.builder()
-                .subject("test-user-uuid-1234") // The mock user ID injected into the RAG context
+                .subject(validUuid)
                 .issuedAt(new Date())
                 .expiration(new Date(expirationTime))
                 .signWith(getSignInKey()) // Sign cryptographically using the application.properties secret

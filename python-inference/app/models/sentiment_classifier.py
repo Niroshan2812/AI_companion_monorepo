@@ -1,4 +1,7 @@
 
+import torch
+from transformers import pipeline
+
 class SentimentClassifier:
     def __init__(self):
 

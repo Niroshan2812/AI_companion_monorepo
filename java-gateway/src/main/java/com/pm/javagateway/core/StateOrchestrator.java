@@ -15,17 +15,21 @@ public class StateOrchestrator {
         this.userRepository = userRepository;
     }
 
-    public Mono<String> buildUserContext(String UserId){
-        // parse the String uuid from JWT payload
-        UUID id = UUID.fromString(UserId);
+    public Mono<String> buildUserContext(String UserId) {
+        // delays execution until the webSocket Flux
+        return Mono.defer(() -> {
+            try {
+                // parse the String uuid from JWT payload
+                UUID id = UUID.fromString(UserId);
 
-        // NONBLOCKING r2DBC repo for the user profile
-        return userRepository.findById(id)
-                .map(user -> {
-                    // Serialize the relaitional state into a prompt-freindly stirng for llm
-                    return "System context -> Timezeone: "+ user.getTimezone() + "| Proactive Allowed " + user.getProactiveOptIn();
-                })
-                // Yeid a safe fallback if the DB return empty
-                .defaultIfEmpty("System context -> Anonymous/New User");
+                return userRepository.findById(id)
+                        .map(user -> "System Context -> Timezone: " + user.getTimezone() +
+                                " | Proactive Allowed: " + user.getProactiveOptIn())
+                        .defaultIfEmpty("System Context -> Anonymous/New User");
+            } catch (IllegalArgumentException e) {
+                return Mono.just("System Context -> Anonymous/New User");
+            }
+
+        });
     }
 }
