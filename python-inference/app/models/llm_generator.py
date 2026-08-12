@@ -7,19 +7,21 @@ class LLMGenerator:
     def __init__(self):
         # initialize conversation tokenizer and Model weights 
         print("Nural Engine - Loading DialoGPT model")
-        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small" , clean_up_tokenization_spaces = False)
         self.model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small")
         print("Nural Engine - LLM loaded")  
 
     def generate_stream(self, system_context: str, emotion: str, user_prompt: str):
         # Construct the final prompt injecting RAG memory and the sentiment classification
+        # engineered_prompt =(
+        #     f"Context: {system_context}\n"
+        #     f"User Emotion: {emotion}\n"
+        #     f"User: {user_prompt}\n"
+        #     f"Companion:"
+        # )
 
-        engineered_prompt =(
-            f"Context: {system_context}\n"
-            f"User Emotion: {emotion}\n"
-            f"User: {user_prompt}\n"
-            f"Companion:"
-        )
+        # format the prompt as a natural sentence also append EOS token so the model knows its turn to reply 
+        engineered_prompt = f"{user_prompt} I am currently feeling {emotion}." + self.tokenizer.eos_token
 
         # Tokenized the input string into a pyrotch tensor 
         inputs = self.tokenizer([engineered_prompt], return_tensors ="pt")
@@ -33,7 +35,9 @@ class LLMGenerator:
             inputs, 
             streamer = streamer,
             max_new_tokens = 75,
+            do_sample = True, # enabel non-greedy decoding, activate temp 
             temperature = 0.7,
+            top_p = 0.9, # only considers tokens within the top 90% cumulative prob mass
             pad_token_id = self.tokenizer.eos_token_id
         )
 
