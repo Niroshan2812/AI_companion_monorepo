@@ -11,6 +11,7 @@ import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
+
 @Component
 public class AiInferenceGrpcClient {
 
@@ -29,7 +30,7 @@ public class AiInferenceGrpcClient {
         this.asyncStub = InferenceServiceGrpc.newStub(channel);
     }
 
-    public Flux<String> streamInference(String userId, String sanitizedPrompt) {
+    public Flux<String> streamInference(String userId, String sanitizedPrompt, String contextString) {
         // Construct the immutable Protobuf request message using the Builder pattern.
         InferenceRequest request = InferenceRequest.newBuilder()
                 .setUserId(userId)

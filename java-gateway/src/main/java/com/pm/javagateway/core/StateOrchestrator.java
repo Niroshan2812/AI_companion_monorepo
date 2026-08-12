@@ -15,7 +15,7 @@ public class StateOrchestrator {
         this.userRepository = userRepository;
     }
 
-    public Mono<String>buildUserContext(String UserId){
+    public Mono<String> buildUserContext(String UserId){
         // parse the String uuid from JWT payload
         UUID id = UUID.fromString(UserId);
 
