@@ -73,6 +73,16 @@
             <artifactId>grpc-netty-shaded</artifactId>
             <version>1.62.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>1.62.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+            <version>1.62.2</version>
+        </dependency>
 
         <dependency>
             <groupId>io.grpc</groupId>

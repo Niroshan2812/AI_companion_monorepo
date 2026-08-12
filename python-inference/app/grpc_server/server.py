@@ -48,7 +48,8 @@ async def serve():
     )
 
     # bind to an internal port 
-    listen_addr = '[::]:50051'
+    #listen_addr = '[::]:50051'
+    listen_addr = '127.0.0.1:50051'
     server.add_insecure_port(listen_addr)
 
     print(f"[gRPC Server] Service initialized and listening on {listen_addr}...")

@@ -20,7 +20,8 @@ public class AiInferenceGrpcClient {
     @PostConstruct
     public void init() {
         // Initialize the non-blocking gRPC channel targeting the local Python microservice on port 50051.
-        this.channel = ManagedChannelBuilder.forAddress("localhost", 50051)
+        //this.channel = ManagedChannelBuilder.forAddress("localhost", 50051)
+        this.channel = ManagedChannelBuilder.forAddress("127.0.0.1", 50051)
                 .usePlaintext() // Used for local development; will be updated to mTLS SSLContext in production.
                 .build();
 
@@ -42,12 +43,17 @@ public class AiInferenceGrpcClient {
 
                 @Override
                 public void onNext(TokenChunk chunk) {
-                    // Check if the Python service issued an end-of-stream signal.
-                    if (chunk.getIsComplete()) {
-                        sink.complete();
-                    } else {
-                        //Push the individual generated string token into the reactive pipeline.
-                        sink.next(chunk.getToken());
+                    try {
+                        // Check if the Python service issued an end-of-stream signal.
+                        if (chunk.getIsComplete()) {
+                            sink.complete();
+                        } else {
+                            //Push the individual generated string token into the reactive pipeline.
+                            sink.next(chunk.getToken());
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Exception in onNext: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
