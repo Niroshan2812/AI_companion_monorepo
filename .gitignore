@@ -57,3 +57,23 @@ buildNumber.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# ------------------------------------------------------------------------------
+# 5. Python & AI Inference (Applies to python-inference/)
+# ------------------------------------------------------------------------------
+# Virtual environments
+venv/
+env/
+ENV/
+.env_python/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# gRPC generated files
+*_pb2.py
+*_pb2_grpc.py
+*_pb2.pyi
+*_pb2_grpc.pyi

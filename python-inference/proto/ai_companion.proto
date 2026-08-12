@@ -1,0 +1,30 @@
+// Define the syntax and standard Java package options to generate the classes.
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.companion.grpc";
+
+// Define the InferenceService interface to enforce
+// polymorphism in the backend.
+service InferenceService {
+
+  // Define a server-streaming RPC method.
+  // The Python server will yield multiple TokenChunks
+  // asynchronously for a single prompt.
+  rpc StreamTokens (InferenceRequest) returns (stream TokenChunk);
+}
+
+// Define the exact data parameters required for the request.
+// This ensures type safety and limits the attack surface for
+// injection at the network layer.
+message InferenceRequest {
+  string user_id = 1;
+  string sanitized_prompt = 2; // Text strictly pre-filtered by Java for prompt injection
+  string vector_context = 3;   // The retrieved episodic memory payload
+}
+
+// Define the streaming response payload.
+message TokenChunk {
+  string token = 1;
+  bool is_complete = 2;
+}
+
