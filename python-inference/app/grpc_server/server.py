@@ -6,13 +6,15 @@ import grpc
 from app.grpc_server import ai_companion_pb2
 from app.grpc_server import ai_companion_pb2_grpc
 from app.models.sentiment_classifier import SentimentClassifier
+from app.models.llm_generator import LLMGenerator
 
 
 
 class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
 
     # inject the  Deep leaning model into gRPC service via composition
-    def __init__ (self, sentiment_model: SentimentClassifier):
+    def __init__ (self, sentiment_model: SentimentClassifier, llm_model: LLMGenerator ):
+        self.llm_model = llm_model
         self.sentiment_model = sentiment_model
 
 
@@ -31,22 +33,23 @@ class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
         emotion = self.sentiment_model.anlyze_emotion(prompt)
         print(f"Nural engine - Detected emotion{emotion}")
 
-        # detected tensor outout
-        dynamic_responce = f"I sense that you are feeling {emotion}."
-        mock_response_tokens = dynamic_responce.split(" ")
+        # trigger asyncc LLM generation thread 
+        streamer = self.llm_model.generate_stream(db_context, emotion, prompt)
+
         
-
-
         # yield tokens one by one to maintain async server-streaming over gRPC
-        for token  in mock_response_tokens:
-            chunk = ai_companion_pb2.TokenChunk(
-                token = token + " ", 
-                is_complete = False
-            )
-            yield chunk
-            # simulate autogressive LLM generation latency 
-            await asyncio.sleep(0.05)
+        # Iterate over the thread-safe token queue as the GPU yields them.
+        for new_token  in streamer:
+            if new_token:
+                chunk = ai_companion_pb2.TokenChunk(
+                    token=new_token, 
+                    is_complete=False
+                )
+                yield chunk
+                # contol back asyncio event looop prevent blocking
+                await asyncio.sleep(0.01)
 
+        # signal the java netty stream that tensor generation is fully comleate             
         # send the completino single token
         yield ai_companion_pb2.TokenChunk(token="", is_complete = True)
 
@@ -55,9 +58,10 @@ async def serve():
     server = grpc.aio.server()
 
     sentiment_classifier = SentimentClassifier()
+    llm_genetator = LLMGenerator()
 
     ai_companion_pb2_grpc.add_InferenceServiceServicer_to_server(
-        InferenceServiceServicer(sentiment_classifier),server
+        InferenceServiceServicer(sentiment_classifier, llm_genetator),server
     )
 
     # bind to an internal port 
