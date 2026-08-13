@@ -7,6 +7,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import org.springframework.data.r2dbc.repository.Modifying;
 
 public interface UserRepository extends ReactiveCrudRepository<User, UUID> {
 
@@ -15,7 +16,12 @@ public interface UserRepository extends ReactiveCrudRepository<User, UUID> {
     @Query("SELECT * FROM users WHERE proactive_opt_in = true AND last_interaction_timestamp < :thresholdTime")
     Flux<User> findDormantUsersForProactiveMessaging(ZonedDateTime thresholdTime);
 
-    @org.springframework.data.r2dbc.repository.Modifying
+    @Modifying
     @Query("INSERT INTO users (id, username, timezone) VALUES (:id, 'Anonymous', 'UTC') ON CONFLICT (id) DO NOTHING")
     reactor.core.publisher.Mono<Integer> insertUserIfNotExists(UUID id);
+
+    // track last interaction time to identify dormant users for proactive messaging
+    @Modifying
+    @Query("UPDATE users SET last_interaction_timestamp = :time WHERE id = :id")
+    reactor.core.publisher.Mono<Integer> updateLastInteraction(UUID id, ZonedDateTime time);
 }

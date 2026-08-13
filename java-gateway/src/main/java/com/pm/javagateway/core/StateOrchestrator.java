@@ -5,6 +5,7 @@ import com.pm.javagateway.repositories.VectorMemoryRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import com.pm.javagateway.config.AiInferenceGrpcClient;
+import java.time.ZonedDateTime;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class StateOrchestrator {
         UUID id = UUID.fromString(UserId);
 
         Mono<String> profileMono = userRepository.insertUserIfNotExists(id)
+                .then(updateUserInteractionTimeStamp(UserId))
                 .then(userRepository.findById(id))
                 .map(user -> "Timezone: " + user.getTimezone() + " | ")
                 .defaultIfEmpty("Anonymous User |");
@@ -50,6 +52,11 @@ public class StateOrchestrator {
         UUID id = UUID.fromString(userId);
         return grpcsClient.generateEmbedding(prompt)
                 .flatMap(vectorString -> vectorMemoryRepository.saveMemory(id, prompt, response, vectorString))
+                .then();
+    }
+
+    public Mono<Void> updateUserInteractionTimeStamp(String userId) {
+        return userRepository.updateLastInteraction(UUID.fromString(userId), ZonedDateTime.now())
                 .then();
     }
 }
