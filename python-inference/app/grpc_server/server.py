@@ -8,15 +8,20 @@ from app.grpc_server import ai_companion_pb2_grpc
 from app.models.sentiment_classifier import SentimentClassifier
 #from app.models.llm_generator import LLMGenerator
 from app.models.groq_generator import GroqGenerator
+from app.models.embedding_generator import EmbeddingGenerator
+
 
 
 
 class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
 
     # inject the  Deep leaning model into gRPC service via composition
-    def __init__ (self, sentiment_model: SentimentClassifier, llm_model: GroqGenerator ):
+    def __init__ (self, sentiment_model: SentimentClassifier, llm_model: GroqGenerator, embedding_model:EmbeddingGenerator):
         self.llm_model = llm_model
         self.sentiment_model = sentiment_model
+        self.embedding_model = embedding_model
+
+    
 
 
     # overide the streamTokens RPC method in the .proto file 
@@ -54,15 +59,25 @@ class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
         # send the completino single token
         yield ai_companion_pb2.TokenChunk(token="", is_complete = True)
 
+    async def GenerateEmbedding(self, request, context):
+        text_to_embed = request.text
+
+        #generate the vector array 
+        vector_array = self.embedding_model.generate(text_to_embed)
+
+        return ai_companion_pb2.EmbeddingResponse(embedding=vector_array)
+
+
 async def serve():
     # Instantiate an async gRPC server
     server = grpc.aio.server()
 
     sentiment_classifier = SentimentClassifier()
     llm_genetator = GroqGenerator()
+    embedding_generator =EmbeddingGenerator()
 
     ai_companion_pb2_grpc.add_InferenceServiceServicer_to_server(
-        InferenceServiceServicer(sentiment_classifier, llm_genetator),server
+        InferenceServiceServicer(sentiment_classifier, llm_genetator,embedding_generator),server
     )
 
     # bind to an internal port 
