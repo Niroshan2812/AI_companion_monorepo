@@ -15,11 +15,11 @@ CREATE TABLE users (
 CREATE TABLE conversation_memory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    raw_text TEXT NOT NULL,
-    sentiment_tag VARCHAR(50),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    prompt TEXT NOT NULL,
+    response TEXT NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     -- Store the dense vector embedding for similarity searches.
-    embedding VECTOR(768) 
+    embedding VECTOR(384) 
 );
 
 -- Create an HNSW index to optimize Approximate Nearest Neighbor (ANN) vector search speed.

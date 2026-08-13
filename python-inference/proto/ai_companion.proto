@@ -11,8 +11,14 @@ service InferenceService {
   // The Python server will yield multiple TokenChunks
   // asynchronously for a single prompt.
   rpc StreamTokens (InferenceRequest) returns (stream TokenChunk);
+  rpc GenerateEmbedding (EmbeddingRequest) returns (EmbeddingResponse);
 }
-
+message EmbeddingRequest {
+  string text = 1;
+}
+message EmbeddingResponse {
+  repeated float embedding = 1; // "repeated float" is Protobuf's way of defining an array of floats
+}
 // Define the exact data parameters required for the request.
 // This ensures type safety and limits the attack surface for
 // injection at the network layer.
