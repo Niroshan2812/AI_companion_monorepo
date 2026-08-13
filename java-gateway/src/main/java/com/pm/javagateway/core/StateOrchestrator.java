@@ -25,7 +25,8 @@ public class StateOrchestrator {
     public Mono<String> buildUserContext(String UserId, String sanitizedPrompt) {
         UUID id = UUID.fromString(UserId);
 
-        Mono<String> profileMono = userRepository.findById(id)
+        Mono<String> profileMono = userRepository.insertUserIfNotExists(id)
+                .then(userRepository.findById(id))
                 .map(user -> "Timezone: " + user.getTimezone() + " | ")
                 .defaultIfEmpty("Anonymous User |");
 
@@ -45,4 +46,10 @@ public class StateOrchestrator {
         return Mono.zip(profileMono, memoryMono, (profile, memory) -> "System Context => " + profile + memory);
     }
 
+    public Mono<Void> saveConversationTurn(String userId, String prompt, String response) {
+        UUID id = UUID.fromString(userId);
+        return grpcsClient.generateEmbedding(prompt)
+                .flatMap(vectorString -> vectorMemoryRepository.saveMemory(id, prompt, response, vectorString))
+                .then();
+    }
 }

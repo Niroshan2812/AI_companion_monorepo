@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -20,5 +21,9 @@ public interface VectorMemoryRepository  extends ReactiveCrudRepository<Conversa
             "ORDER BY embedding <-> :queryEmbedding::vector " +
             "LIMIT 3")
     Flux<ConversationMemory> findTop3SimilarMemories(UUID userId, String queryEmbedding);
+
+    @org.springframework.data.r2dbc.repository.Modifying
+    @Query("INSERT INTO conversation_memory (user_id, prompt, response, embedding) VALUES (:userId, :prompt, :response, :embedding::vector)")
+    Mono<Integer> saveMemory(UUID userId, String prompt, String response, String embedding);
 
 }

@@ -37,6 +37,8 @@ public class CompanionWebSocketHandler implements WebSocketHandler {
                 .flatMap(inboundMessage -> {
                     String rawText = inboundMessage.getPayloadAsText();
                     String cleanText = sanitizer.stripInjectionVectors(rawText);
+                    
+                    StringBuilder fullResponse = new StringBuilder();
 
                     // Trigger the non-blocking database query to fetch the user profile.
                     // The flatMap ensures the Netty thread yields while waiting for PostgreSQL.
@@ -47,7 +49,19 @@ public class CompanionWebSocketHandler implements WebSocketHandler {
                                 System.out.println("Gateway: Routing to pytorch - "+ cleanText + "''");
                                 return grpcClient.streamInference(userId, cleanText, contextString);
                             })
-                            .doOnNext(token -> System.out.println("Gateway: token - "+ token))
+                            .doOnNext(token -> {
+                                System.out.println("Gateway: token - "+ token);
+                                fullResponse.append(token);
+                            })
+                            .doOnComplete(() -> {
+                                if (fullResponse.length() > 0) {
+                                    stateOrchestrator.saveConversationTurn(userId, cleanText, fullResponse.toString())
+                                        .subscribe(
+                                            null,
+                                            err -> System.err.println("Failed to save memory: " + err.getMessage())
+                                        );
+                                }
+                            })
                             .onErrorResume(throwable -> {
                                 System.err.println("[Gateway Error] Pipeline Failure: " + throwable.getMessage());
                                 return Flux.just("[System Exception] The AI neural engine is currently offline or unreachable.");

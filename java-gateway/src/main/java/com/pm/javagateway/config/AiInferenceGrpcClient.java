@@ -37,7 +37,7 @@ public class AiInferenceGrpcClient {
         InferenceRequest request = InferenceRequest.newBuilder()
                 .setUserId(userId)
                 .setSanitizedPrompt(sanitizedPrompt)
-                .setVectorContext("") // Placeholder for RAG memory context payload in Phase 4.
+                .setVectorContext(contextString)
                 .build();
 
         // Convert the asynchronous gRPC StreamObserver callback pattern into a Reactive
