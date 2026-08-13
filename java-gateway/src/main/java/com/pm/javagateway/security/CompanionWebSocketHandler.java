@@ -15,19 +15,23 @@ public class CompanionWebSocketHandler implements WebSocketHandler {
     private final AiInferenceGrpcClient grpcClient;
     private final SanitizationUtility sanitizer;
     private final StateOrchestrator stateOrchestrator;
-
+    private final JwtValidator jwtValidator;
 
     public CompanionWebSocketHandler(AiInferenceGrpcClient grpcClient,
                                      SanitizationUtility sanitizer,
-                                     StateOrchestrator stateOrchestrator) {
+                                     StateOrchestrator stateOrchestrator,
+                                     JwtValidator jwtValidator) {
         this.grpcClient = grpcClient;
         this.sanitizer = sanitizer;
         this.stateOrchestrator = stateOrchestrator;
+        this.jwtValidator = jwtValidator;
     }
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        String userId = (String) session.getAttributes().getOrDefault("SECURE_USER_ID", "anonymous_user");
+        String jwtToken = org.springframework.web.util.UriComponentsBuilder.fromUri(session.getHandshakeInfo().getUri())
+                .build().getQueryParams().getFirst("token");
+        String userId = (jwtToken != null) ? jwtValidator.extractUserId(jwtToken) : "anonymous_user";
 
         Flux<WebSocketMessage> responseFlux = session.receive()
                 .flatMap(inboundMessage -> {
