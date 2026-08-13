@@ -36,15 +36,19 @@ For a deep dive into the technical design, workflows, and data pipelines, please
   - Designed the dual-node microservices architecture (Java Gateway + Python Engine).
   - Defined the reactive and proactive interaction workflows.
   - Specified the long-term memory (RAG) and emotional routing pipelines.
-* **[ ] Milestone 2: Infrastructure & Gateway Initialization**
+* **[x] Milestone 2: Infrastructure & Gateway Initialization**
   - Initialize Spring WebFlux project and WebSocket tunnels.
   - Set up PostgreSQL with pgvector and R2DBC schemas.
-* **[ ] Milestone 3: AI Engine & gRPC Bridge**
+* **[x] Milestone 3: AI Engine & gRPC Bridge**
   - Implement the PyTorch inference environment.
   - Establish the bi-directional gRPC stream between Java and Python.
-* **[ ] Milestone 4: Memory & Proactivity Implementation**
+* **[x] Milestone 4: Memory & Proactivity Implementation**
   - Integrate pgvector semantic search for RAG.
   - Implement the Spring `@Scheduled` worker for proactive engagement and vector similarity context injection.
+* **[ ] Milestone 5: Advanced Emotional Alignment & Persona Matching (In Progress)**
+  - Track dynamic psychological profiles (e.g., need state, communication style, stress baseline).
+  - Background asynchronous psychoanalysis of long-term history.
+  - "Mirror-Match" strategy for subconscious empathy routing.
 
 ##  Contributing
 
