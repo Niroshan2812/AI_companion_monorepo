@@ -3,3 +3,5 @@ grpcio-tools
 protobuf
 torch
 transformers
+groq
+python-dotenv

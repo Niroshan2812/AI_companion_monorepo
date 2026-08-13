@@ -6,14 +6,15 @@ import grpc
 from app.grpc_server import ai_companion_pb2
 from app.grpc_server import ai_companion_pb2_grpc
 from app.models.sentiment_classifier import SentimentClassifier
-from app.models.llm_generator import LLMGenerator
+#from app.models.llm_generator import LLMGenerator
+from app.models.groq_generator import GroqGenerator
 
 
 
 class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
 
     # inject the  Deep leaning model into gRPC service via composition
-    def __init__ (self, sentiment_model: SentimentClassifier, llm_model: LLMGenerator ):
+    def __init__ (self, sentiment_model: SentimentClassifier, llm_model: GroqGenerator ):
         self.llm_model = llm_model
         self.sentiment_model = sentiment_model
 
@@ -58,7 +59,7 @@ async def serve():
     server = grpc.aio.server()
 
     sentiment_classifier = SentimentClassifier()
-    llm_genetator = LLMGenerator()
+    llm_genetator = GroqGenerator()
 
     ai_companion_pb2_grpc.add_InferenceServiceServicer_to_server(
         InferenceServiceServicer(sentiment_classifier, llm_genetator),server
