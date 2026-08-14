@@ -45,7 +45,7 @@ For a deep dive into the technical design, workflows, and data pipelines, please
 * **[x] Milestone 4: Memory & Proactivity Implementation**
   - Integrate pgvector semantic search for RAG.
   - Implement the Spring `@Scheduled` worker for proactive engagement and vector similarity context injection.
-* **[ ] Milestone 5: Advanced Emotional Alignment & Persona Matching (In Progress)**
+* **[x] Milestone 5: Advanced Emotional Alignment & Persona Matching**
   - Track dynamic psychological profiles (e.g., need state, communication style, stress baseline).
   - Background asynchronous psychoanalysis of long-term history.
   - "Mirror-Match" strategy for subconscious empathy routing.

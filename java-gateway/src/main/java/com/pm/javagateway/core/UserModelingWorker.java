@@ -20,8 +20,8 @@ public class UserModelingWorker {
         this.grpcClient = grpcClient;
     }
 
-    // Run every 2 min for testing
-    @Scheduled(fixedRate = 120000)
+    // Run every 6 hr for testing
+    @Scheduled(fixedRate = 21600000)
     public void generateDigitalTwinProfiles() {
         System.out.println("BUMP profiler - Startign backgroung user compression job ");
 

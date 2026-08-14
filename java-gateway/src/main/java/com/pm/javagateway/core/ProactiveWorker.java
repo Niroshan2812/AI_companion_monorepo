@@ -23,11 +23,11 @@ public class ProactiveWorker {
         this.sessionRegistry = sessionRegistry;
     }
 
-    // Run every 60 seconds (for testing purposes, instead of daily)
-    @Scheduled(fixedRate = 60000)
+    // Run every 1hr (for testing purposes, instead of daily)
+    @Scheduled(fixedRate = 3600000)
     public void runProactiveEngagement() {
-        // Find users inactive for more than 5 minutes (for testing)
-        ZonedDateTime threshold = ZonedDateTime.now().minusMinutes(5);
+        // Find users inactive for more than 1 hr (for testing)
+        ZonedDateTime threshold = ZonedDateTime.now().minusHours(1);
 
         userRepository.findDormantUsersForProactiveMessaging(threshold)
                 .filter(user -> sessionRegistry.isUserConnected(user.getId().toString())) // Only message if they have
