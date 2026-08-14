@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import com.companion.grpc.UserProfileRequest;
 
 @Component
 public class AiInferenceGrpcClient {
@@ -98,5 +99,33 @@ public class AiInferenceGrpcClient {
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();
         }
+    }
+
+    public reactor.core.publisher.Mono<String> generateUserProfile(String userId, String rawHistory) {
+        UserProfileRequest request = UserProfileRequest.newBuilder()
+                .setUserId(userId)
+                .setRawInteractionHistory(rawHistory)
+                .build();
+
+        return reactor.core.publisher.Mono.create(sink -> {
+            stub.generateUserProfile(request,
+                    new io.grpc.stub.StreamObserver<com.companion.grpc.UserProfileResponse>() {
+                        @Override
+                        public void onNext(com.companion.grpc.UserProfileResponse response) {
+                            sink.success(response.getCompressedProfile());
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            sink.error(t);
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                            // handled by onNext
+                        }
+                    });
+        });
+
     }
 }
