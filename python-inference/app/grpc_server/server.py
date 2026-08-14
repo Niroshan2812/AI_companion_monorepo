@@ -66,6 +66,22 @@ class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
         vector_array = self.embedding_model.generate(text_to_embed)
 
         return ai_companion_pb2.EmbeddingResponse(embedding=vector_array)
+    
+    async def GenerateUserProfile(self, request, context):
+        user_id = request.user_id
+        raw_history = request.rraw_interaction_history
+
+        print(f"GRPC service: Recived BUMP profile request for {user_id}")
+
+        # offload the LLM network call to a background thread to prevent blocking the asunc server loop
+        loop = asyncio.get_running_loop()
+        compressed_profile = await loop.run_in_executor(
+            None, 
+            self.llm_model.generate_bump_profile,
+            raw_history
+        )
+        print(f"grpc service - generate Digital twin for {user_id}: {compressed_profile}")
+        return ai_companion_pb2.UserProfileResponse(compressed_profile = compressed_profile)
 
 
 async def serve():

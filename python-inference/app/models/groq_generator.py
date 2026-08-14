@@ -12,7 +12,37 @@ class GroqGenerator:
         self.model_id = "llama-3.3-70b-versatile"
         print("Nural engine - Groq client Redy")
     
+    def generate_bump_profile(self, raw_history:str) ->str:
+        """
+        Implements the BUMP framework by compressing raw interaction logs into a Digital Twin profile.
+        """
 
+        system_prompt =(
+            "You are a psychological profiler. Read the following raw interaction logs between an AI and a human user. "
+            "Extract their core personality traits, their typical emotional state, what they enjoy talking about, "
+            "and how they prefer to communicate. Write a short, single-paragraph 'Digital Twin' profile describing the user. "
+            "Do not include pleasantries, just output the paragraph."
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Here are the raw logs:\n{raw_history}"}
+        ]
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_id,
+                messages=messages,
+                temperature=0.3,
+                max_tokens=300,
+            )
+            return response.choices[0].message.content.strip()
+        
+        except Exception as e:
+            print(f"BUMP error - Error generating BUMP profile  {e}")
+            return "Profile generation failed "
+
+            
     def generate_stream(self, system_context:str, emotion:str, user_prompt:str):
 
         """
