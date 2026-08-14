@@ -24,4 +24,8 @@ public interface UserRepository extends ReactiveCrudRepository<User, UUID> {
     @Modifying
     @Query("UPDATE users SET last_interaction_timestamp = :time WHERE id = :id")
     reactor.core.publisher.Mono<Integer> updateLastInteraction(UUID id, ZonedDateTime time);
+
+    @Modifying
+    @Query("UPDATE users SET digital_twin_profile = :profile WHERE id = :id")
+    reactor.core.publisher.Mono<Integer> updateDigitalTwinProfile(UUID id, String profile);
 }

@@ -7,7 +7,8 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL,
     timezone VARCHAR(50) DEFAULT 'UTC',
     proactive_opt_in BOOLEAN DEFAULT TRUE,
-    last_interaction_timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    last_interaction_timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    digital_twin_profile TEXT DEFAULT ''
 );
 
 -- Create the RAG memory table utilizing pgvector's custom data type.

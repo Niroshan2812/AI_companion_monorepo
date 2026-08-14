@@ -13,6 +13,15 @@ public class User {
     private UUID id;
     private String username;
     private String timezone;
+    private String digitalTwinProfile;
+
+    public String getDigitalTwinProfile() {
+        return digitalTwinProfile;
+    }
+
+    public void setDigitalTwinProfile(String digitalTwinProfile) {
+        this.digitalTwinProfile = digitalTwinProfile;
+    }
 
     public ZonedDateTime getLastInteractionTimestamp() {
         return lastInteractionTimestamp;
@@ -56,7 +65,5 @@ public class User {
 
     private Boolean proactiveOptIn;
     private ZonedDateTime lastInteractionTimestamp;
-
-
 
 }
