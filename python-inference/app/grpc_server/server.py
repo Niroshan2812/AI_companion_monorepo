@@ -69,7 +69,7 @@ class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
     
     async def GenerateUserProfile(self, request, context):
         user_id = request.user_id
-        raw_history = request.rraw_interaction_history
+        raw_history = request.raw_interaction_history
 
         print(f"GRPC service: Recived BUMP profile request for {user_id}")
 

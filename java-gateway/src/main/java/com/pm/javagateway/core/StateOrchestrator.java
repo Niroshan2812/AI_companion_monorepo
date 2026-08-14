@@ -29,7 +29,13 @@ public class StateOrchestrator {
         Mono<String> profileMono = userRepository.insertUserIfNotExists(id)
                 .then(updateUserInteractionTimeStamp(UserId))
                 .then(userRepository.findById(id))
-                .map(user -> "Timezone: " + user.getTimezone() + " | ")
+                .map(user -> {
+                    String twin = (user.getDigitalTwinProfile() != null && !user.getDigitalTwinProfile().isEmpty())
+                            ? user.getDigitalTwinProfile()
+                            : "No Profile yet. ";
+
+                    return "TimeZone: " + user.getTimezone() + " | BUMP profile: " + twin + " | ";
+                })
                 .defaultIfEmpty("Anonymous User |");
 
         Mono<String> memoryMono = grpcsClient.generateEmbedding(sanitizedPrompt)

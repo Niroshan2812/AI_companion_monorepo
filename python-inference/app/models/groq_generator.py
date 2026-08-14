@@ -52,13 +52,19 @@ class GroqGenerator:
         # The Persona Engine (This is where the "Human Vibe" comes from)
         # We tell the LLM exactly how to act, and how to react to the user's emotion.
 
+        empathy_instruction = ""
+        if emotion in ["sadness", "fear", "anger", "disgust"]:
+            empathy_instruction = "EmpRL Objective: Maximize EMOTIONAL REACTION (validate their feeling) and INTERPRETATION (understand their pain). Do not force solutions."
+        elif emotion in ["joy", "surprise"]:
+            empathy_instruction = "EmpRL Objective: Maximize EXPLORATION (ask questions to expand on their excitement) and share in their energy."
+        else:
+            empathy_instruction = "EmpRL Objective: Maintain a balanced, natural conversation flow."
         engineered_system_prompt =(
             "You are a highly empathetic, insightful, and natural human companion. "
             "Do not act like a robotic AI assistant. Speak conversationally, show personality, and ask thoughtful questions. "
-            f"Here is the context of past conversations: {system_context}\n\n"
+            f"Here is the context of past conversations and the user's BUMP Digital Twin Profile: {system_context}\n\n"
             f"CRITICAL INSTRUCTION: The user's current emotional state is: {emotion.upper()}. "
-            "You MUST adapt your tone to match or support this emotion. "
-            "If they are sad, be comforting and gentle. If they are joyful, match their high energy."
+            f"{empathy_instruction}"
         )
 
         # build the message array
