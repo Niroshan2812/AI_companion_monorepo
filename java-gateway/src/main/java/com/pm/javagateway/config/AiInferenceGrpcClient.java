@@ -108,7 +108,7 @@ public class AiInferenceGrpcClient {
                 .build();
 
         return reactor.core.publisher.Mono.create(sink -> {
-            stub.generateUserProfile(request,
+            asyncStub.generateUserProfile(request,
                     new io.grpc.stub.StreamObserver<com.companion.grpc.UserProfileResponse>() {
                         @Override
                         public void onNext(com.companion.grpc.UserProfileResponse response) {
