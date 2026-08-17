@@ -14,6 +14,15 @@ public class User {
     private String username;
     private String timezone;
     private String digitalTwinProfile;
+    private String aiMode;
+
+    public String getAiMode() {
+        return aiMode;
+    }
+
+    public void setAiMode(String aiMode) {
+        this.aiMode = aiMode;
+    }
 
     public String getDigitalTwinProfile() {
         return digitalTwinProfile;

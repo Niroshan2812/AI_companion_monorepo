@@ -5,8 +5,10 @@ import com.pm.javagateway.repositories.VectorMemoryRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import com.pm.javagateway.config.AiInferenceGrpcClient;
-import java.time.ZonedDateTime;
 
+import com.pm.javagateway.core.inference.InferenceContext;
+import com.pm.javagateway.core.inference.InferenceStatergy;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -15,43 +17,31 @@ public class StateOrchestrator {
     private final UserRepository userRepository;
     private final VectorMemoryRepository vectorMemoryRepository;
     private final AiInferenceGrpcClient grpcsClient;
+    private final List<InferenceStatergy> strategies;
 
     public StateOrchestrator(UserRepository userRepository, VectorMemoryRepository vectorMemoryRepository,
-            AiInferenceGrpcClient grpcsClient) {
+            AiInferenceGrpcClient grpcsClient, List<InferenceStatergy> strategies) {
         this.userRepository = userRepository;
         this.vectorMemoryRepository = vectorMemoryRepository;
         this.grpcsClient = grpcsClient;
+        this.strategies = strategies;
     }
 
-    public Mono<String> buildUserContext(String UserId, String sanitizedPrompt) {
-        UUID id = UUID.fromString(UserId);
+    public Mono<InferenceContext> buildUserContext(String userId, String sanitizedPrompt) {
+        UUID id = UUID.fromString(userId);
+        // Fetch user's preferred AI mode from DB, then route to the correct Strategy
+        return userRepository.findById(id)
+                .map(user -> user.getAiMode() != null ? user.getAiMode() : "V1_BUMP")
+                .defaultIfEmpty("V1_BUMP")
+                .flatMap(mode -> {
+                    InferenceStatergy selectedStrategy = strategies.stream()
+                            .filter(s -> s.getModeName().equals(mode))
+                            .findFirst()
+                            .orElse(strategies.get(0));
 
-        Mono<String> profileMono = userRepository.insertUserIfNotExists(id)
-                .then(updateUserInteractionTimeStamp(UserId))
-                .then(userRepository.findById(id))
-                .map(user -> {
-                    String twin = (user.getDigitalTwinProfile() != null && !user.getDigitalTwinProfile().isEmpty())
-                            ? user.getDigitalTwinProfile()
-                            : "No Profile yet. ";
-
-                    return "TimeZone: " + user.getTimezone() + " | BUMP profile: " + twin + " | ";
-                })
-                .defaultIfEmpty("Anonymous User |");
-
-        Mono<String> memoryMono = grpcsClient.generateEmbedding(sanitizedPrompt)
-                .flatMapMany(vectorString ->
-                // Pass the real generated vector to your incredible pgvector <-> query!
-                vectorMemoryRepository.findTop3SimilarMemories(id, vectorString))
-                .map(memory -> "Q: " + memory.getPrompt() + " A: " + memory.getResponse())
-                .collectList()
-                .map(list -> {
-                    if (list.isEmpty()) {
-                        return "No prior memory";
-                    }
-                    return "Past Context: " + String.join(" | ", list);
+                    System.out.println("StateOrchestrator: Routing to " + selectedStrategy.getModeName());
+                    return selectedStrategy.buildContext(userId, sanitizedPrompt);
                 });
-
-        return Mono.zip(profileMono, memoryMono, (profile, memory) -> "System Context => " + profile + memory);
     }
 
     public Mono<Void> saveConversationTurn(String userId, String prompt, String response) {
@@ -61,8 +51,4 @@ public class StateOrchestrator {
                 .then();
     }
 
-    public Mono<Void> updateUserInteractionTimeStamp(String userId) {
-        return userRepository.updateLastInteraction(UUID.fromString(userId), ZonedDateTime.now())
-                .then();
-    }
 }

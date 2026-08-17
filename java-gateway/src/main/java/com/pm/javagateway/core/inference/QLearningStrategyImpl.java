@@ -23,7 +23,7 @@ public class QLearningStrategyImpl implements InferenceStatergy {
     // 20% of the time, try a random action to learn
     private static final double EPSILON = 0.2;
 
-    private QLearningStrategyImpl(QTableRepository qTableRepository, UserRepository userRepository) {
+    public QLearningStrategyImpl(QTableRepository qTableRepository, UserRepository userRepository) {
         this.qTableRepository = qTableRepository;
         this.userRepository = userRepository;
     }
@@ -37,7 +37,7 @@ public class QLearningStrategyImpl implements InferenceStatergy {
     public Mono<InferenceContext> buildContext(String userId, String userPrompt) {
         UUID id = UUID.fromString(userId);
 
-        // define th state
+        // define th state // ---> need to change
         String currentState = userPrompt.length() > 20 ? "LONG_PROMPT" : "SHORT_PROMPT";
 
         // UPDATE INFERENCE TIMESTAMP
