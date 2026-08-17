@@ -56,11 +56,17 @@ public class CompanionWebSocketHandler implements WebSocketHandler {
                     // Trigger the non-blocking database query to fetch the user profile.
                     // The flatMap ensures the Netty thread yields while waiting for PostgreSQL.
                     return stateOrchestrator.buildUserContext(userId, cleanText)
-                            .doOnNext(context -> System.out.println("Gateway: DbState - " + context))
-                            .flatMapMany(contextString -> {
+                            // Updated to extract the system prompt context from the
+                            // returned object for logging.
+                            .doOnNext(context -> System.out
+                                    .println("Gateway: DbState - " + context.getSystemPromptContext()))
+                            .flatMapMany(context -> {
                                 // Once the DB returns the state, open the gRPC stream to Python.
                                 System.out.println("Gateway: Routing to pytorch - " + cleanText + "''");
-                                return grpcClient.streamInference(userId, cleanText, contextString);
+                                // Updated the call to grpcClient.streamInference to pass
+                                // both the system context and the RL action extracted from the context object.
+                                return grpcClient.streamInference(userId, cleanText, context.getSystemPromptContext(),
+                                        context.getRlAction());
                             })
                             .doOnNext(token -> {
                                 System.out.println("Gateway: token - " + token);

@@ -40,7 +40,11 @@ public class ProactiveWorker {
 
                     // Re-use the existing pipeline to gather context and stream inference
                     return stateOrchestrator.buildUserContext(userIdStr, proactivePrompt)
-                            .flatMapMany(context -> grpcClient.streamInference(userIdStr, proactivePrompt, context))
+                            // WHAT HAPPENED HERE: Updated grpcClient.streamInference to accept the new
+                            // method signature
+                            // by passing context.getSystemPromptContext() and context.getRlAction().
+                            .flatMapMany(context -> grpcClient.streamInference(userIdStr, proactivePrompt,
+                                    context.getSystemPromptContext(), context.getRlAction()))
                             .reduce(new StringBuilder(), StringBuilder::append)
                             .map(StringBuilder::toString)
                             .doOnNext(message -> {

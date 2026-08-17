@@ -33,21 +33,27 @@ public class AiInferenceGrpcClient {
         this.blockingStub = InferenceServiceGrpc.newBlockingStub(channel);
     }
 
-    public Flux<String> streamInference(String userId, String sanitizedPrompt, String contextString) {
+    public Flux<String> streamInference(String userId, String sanitizedPrompt, String contextString, String rlAction) {
         // Construct the immutable Protobuf request message using the Builder pattern.
-        InferenceRequest request = InferenceRequest.newBuilder()
+        InferenceRequest.Builder builder = InferenceRequest.newBuilder()
                 .setUserId(userId)
                 .setSanitizedPrompt(sanitizedPrompt)
-                .setVectorContext(contextString)
-                .build();
+                .setVectorContext(contextString);
+
+        // if v2 q-learning mode attache the action
+        if (rlAction != null) {
+            builder.setRlAction(rlAction);
+        }
+
+        InferenceRequest request = builder.build();
 
         // Convert the asynchronous gRPC StreamObserver callback pattern into a Reactive
         // Flux stream.
         return Flux.create(sink -> {
-            asyncStub.streamTokens(request, new StreamObserver<TokenChunk>() {
+            asyncStub.streamInference(request, new StreamObserver<InferenceResponse>() {
 
                 @Override
-                public void onNext(TokenChunk chunk) {
+                public void onNext(InferenceResponse chunk) {
                     try {
                         // Check if the Python service issued an end-of-stream signal.
                         if (chunk.getIsComplete()) {
