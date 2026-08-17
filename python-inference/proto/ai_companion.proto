@@ -28,6 +28,7 @@ message InferenceRequest {
   string user_id = 1;
   string sanitized_prompt = 2; // Text strictly pre-filtered by Java for prompt injection
   string vector_context = 3;   // The retrieved episodic memory payload
+  string rlAction = 4; // action choosing by the q-learning java agent 
 }
 
 // Define the streaming response payload.

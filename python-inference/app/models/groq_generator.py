@@ -9,7 +9,7 @@ class GroqGenerator:
     def __init__(self):
         print("Nural Engine - Initialized groq API client ")
         self.client = Groq()
-        self.model_id = "llama-3.3-70b-versatile"
+        self.model_id = "qwen/qwen3.6-27b"
         print("Nural engine - Groq client Redy")
     
     def generate_bump_profile(self, raw_history:str) ->str:
@@ -43,22 +43,37 @@ class GroqGenerator:
             return "Profile generation failed "
 
             
-    def generate_stream(self, system_context:str, emotion:str, user_prompt:str):
+    def generate_stream(self, system_context:str, emotion:str, user_prompt:str, rl_action:str):
 
         """
-        Generates a streaming response using Groq, injecting the detected emotion into the persona.
+        Generates a streaming response using Groq, injecting the detected emotion or RL Action.
         """
         
         # The Persona Engine (This is where the "Human Vibe" comes from)
         # We tell the LLM exactly how to act, and how to react to the user's emotion.
 
         empathy_instruction = ""
-        if emotion in ["sadness", "fear", "anger", "disgust"]:
-            empathy_instruction = "EmpRL Objective: Maximize EMOTIONAL REACTION (validate their feeling) and INTERPRETATION (understand their pain). Do not force solutions."
-        elif emotion in ["joy", "surprise"]:
-            empathy_instruction = "EmpRL Objective: Maximize EXPLORATION (ask one brief question to expand on their excitement) and share in their energy."
+
+       # V2 Mode --> If Java sends a specific RL Action, strictly enforce it!
+        if rl_action and rl_action.strip() != "":
+            if rl_action == "ACTION_EXPLORE":
+                empathy_instruction = "EmpRL Action (EXPLORE): Ask a deep, open-ended question to get them talking."
+            elif rl_action == "ACTION_VALIDATE":
+                empathy_instruction = "EmpRL Action (VALIDATE): Strongly validate their feelings and empathize. Do NOT ask any questions."
+            elif rl_action == "ACTION_LISTEN":
+                empathy_instruction = "EmpRL Action (LISTEN): Give a very short, supportive acknowledgment. Do NOT ask any questions."
+            elif rl_action == "ACTION_CHANGE_TOPIC":
+                empathy_instruction = "EmpRL Action (CHANGE_TOPIC): Gently change the subject to something entirely new and fun."
+        
+        # V1 Mode: Fallback to the original Emotion-based logic
         else:
-            empathy_instruction = "EmpRL Objective: Maintain a balanced, natural conversation flow."
+            if emotion in ["sadness", "fear", "anger", "disgust"]:
+                empathy_instruction = "EmpRL Objective: Maximize EMOTIONAL REACTION (validate their feeling) and INTERPRETATION (understand their pain). Do not force solutions."
+            elif emotion in ["joy", "surprise"]:
+                empathy_instruction = "EmpRL Objective: Maximize EXPLORATION (ask one brief question to expand on their excitement) and share in their energy."
+            else:
+                empathy_instruction = "EmpRL Objective: Maintain a balanced, natural conversation flow."
+        
         engineered_system_prompt =(
             "You are a highly empathetic, insightful, and natural human companion. "
             "Do not act like a robotic AI assistant. Speak conversationally, like a real person texting a friend. "

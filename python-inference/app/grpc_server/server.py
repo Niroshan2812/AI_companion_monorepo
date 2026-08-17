@@ -32,15 +32,17 @@ class InferenceServiceServicer(ai_companion_pb2_grpc.InferenceServiceServicer):
 
         # Extract the R2DBC db state injected by the Java API gateway 
         db_context = request.vector_context
+        # Extract the Q-learning action 
+        rl_action=request.rlAction  
 
-        print(f"gRPC service - context {db_context} | prompt {prompt}")
+        print(f"gRPC service - context {db_context} | prompt {prompt} | RL Action: {rl_action}")
 
         # classify user emotion 
         emotion = self.sentiment_model.anlyze_emotion(prompt)
         print(f"Nural engine - Detected emotion{emotion}")
 
         # trigger asyncc LLM generation thread 
-        streamer = self.llm_model.generate_stream(db_context, emotion, prompt)
+        streamer = self.llm_model.generate_stream(db_context, emotion, prompt, rl_action)
 
         
         # yield tokens one by one to maintain async server-streaming over gRPC
