@@ -29,8 +29,10 @@
             background-image: radial-gradient(circle at top right, #1e3a8a 0%, transparent 40%),
                 radial-gradient(circle at bottom left, #0f766e 0%, transparent 40%);
             color: var(--text-main);
-            height: 100vh; /* Fallback for older browsers */
-            height: 100dvh; /* Dynamic viewport height to prevent mobile UI from hiding the input box */
+            height: 100vh;
+            /* Fallback for older browsers */
+            height: 100dvh;
+            /* Dynamic viewport height to prevent mobile UI from hiding the input box */
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -233,6 +235,11 @@
     <header>
         <h1>AI Companion</h1>
         <p id="status-text">Disconnected</p>
+        <select id="engineToggle" onchange="switchEngine()"
+            style="padding: 5px; border-radius: 5px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+            <option value="V1_BUMP" style="color: black;">V1: BUMP (Emotion)</option>
+            <option value="V2_QLEARNING" style="color: black;">V2: Q-Learning (RL)</option>
+        </select>
     </header>
 
     <div id="chat-container"></div>
@@ -327,6 +334,26 @@
                 console.error("WebSocket error", err);
             };
         }
+
+        function switchEngine() {
+            const mode = document.getElementById("engineToggle").value;
+            // Assuming your token is still valid from the initial page load
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            // Note: Since JWT validation handles userId internally, 
+            // you might want to hardcode the UUID here temporarily if your frontend 
+            // doesn't know its own UUID yet, OR update the controller to read the JWT!
+            // For testing purposes, paste your testing UUID here:
+            const testUserId = "91e925c6-5cb1-4b0d-88a9-62d1201675e7";
+
+            fetch(`/api/settings/mode?userId=${testUserId}&mode=${mode}`, {
+                method: 'POST'
+            }).then(() => {
+                appendMessage("System", "Engine successfully switched to: " + mode);
+            }).catch(err => console.error("Toggle error", err));
+        }
+
 
         function sendMessage() {
             const text = messageInput.value.trim();

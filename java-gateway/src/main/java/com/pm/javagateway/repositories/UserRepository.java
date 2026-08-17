@@ -28,4 +28,9 @@ public interface UserRepository extends ReactiveCrudRepository<User, UUID> {
     @Modifying
     @Query("UPDATE users SET digital_twin_profile = :profile WHERE id = :id")
     reactor.core.publisher.Mono<Integer> updateDigitalTwinProfile(UUID id, String profile);
+
+    @Modifying
+    @Query("UPDATE users SET ai_mode = :mode WHERE id = :id")
+    reactor.core.publisher.Mono<Integer> updateAiMode(UUID id, String mode);
+
 }
