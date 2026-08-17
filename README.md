@@ -9,6 +9,8 @@ This repository contains the core microservices and components required to build
 * **Proactive Scheduling (Push Notifications):** The AI actively monitors user dormancy. If a user is inactive for a set period, the system independently generates and pushes context-aware check-in messages via WebSockets.
 * **Reactive Long-Term Memory (RAG):** Eliminates "stateless amnesia". Every interaction is stored as a vector embedding in PostgreSQL (`pgvector`), allowing the system to instantly recall semantically relevant past conversations to maintain continuous context.
 * **Emotional Sentiment Routing:** Employs a tensor classification pipeline to map incoming text to 7 emotional states, dynamically altering the AI's foundational prompt to ensure responses are emotionally intelligent and tonally appropriate.
+* **Reinforcement Learning (Q-Learning) Engine:** An experimental engine that dynamically learns the best conversational actions (Validate, Explore, Change Topic, Listen) using epsilon-greedy state-action pairs (Q-Table) to maximize semantic and sentimental rewards.
+* **Dual-Brain Strategy Router:** Hot-swappable architecture allowing real-time switching between the V1 BUMP (Emotion-driven) engine and the V2 Q-Learning (RL-driven) engine.
 * **Asynchronous High-Performance Architecture:** Bypasses Python's GIL by completely isolating the neural engine from the Java API Gateway, communicating via a high-speed multiplexed gRPC/HTTP2 bridge.
 
 ## System Architecture
@@ -49,6 +51,10 @@ For a deep dive into the technical design, workflows, and data pipelines, please
   - Track dynamic psychological profiles (e.g., need state, communication style, stress baseline).
   - Background asynchronous psychoanalysis of long-term history.
   - "Mirror-Match" strategy for subconscious empathy routing.
+* **[x] Milestone 6: Reinforcement Learning Action Engine**
+  - Designed a Q-Table schema backed by Postgres to track User State vs Action pairs.
+  - Implemented the Java Strategy router to hot-swap between V1 (Emotion) and V2 (Q-Learning) modes.
+  - Integrated Groq API (Qwen Reasoning Models) with gRPC to strictly execute RL mathematical actions.
 
 ##  Contributing
 
