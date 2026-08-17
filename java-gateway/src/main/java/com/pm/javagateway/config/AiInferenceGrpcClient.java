@@ -50,10 +50,10 @@ public class AiInferenceGrpcClient {
         // Convert the asynchronous gRPC StreamObserver callback pattern into a Reactive
         // Flux stream.
         return Flux.create(sink -> {
-            asyncStub.streamInference(request, new StreamObserver<InferenceResponse>() {
+            asyncStub.streamTokens(request, new StreamObserver<TokenChunk>() {
 
                 @Override
-                public void onNext(InferenceResponse chunk) {
+                public void onNext(TokenChunk chunk) {
                     try {
                         // Check if the Python service issued an end-of-stream signal.
                         if (chunk.getIsComplete()) {

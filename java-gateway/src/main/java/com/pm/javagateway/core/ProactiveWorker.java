@@ -53,9 +53,8 @@ public class ProactiveWorker {
                             })
                             // Save this check-in to Postgres pgvector so the AI remembers reaching out
                             .flatMap(message -> stateOrchestrator.saveConversationTurn(userIdStr,
-                                    "SYSTEM PROACTIVE TRIGGER", message))
-                            // Update the timestamp so we don't spam them again in 60 seconds
-                            .then(stateOrchestrator.updateUserInteractionTimeStamp(userIdStr));
+                                    "SYSTEM PROACTIVE TRIGGER", message));
+
                 })
                 .subscribe(
                         null,
