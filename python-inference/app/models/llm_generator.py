@@ -31,10 +31,16 @@ class LLMGenerator:
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens = True)
 
         # define the generatioin hyperameters 
+
+        # Fix 
+#         The model is generating so much internal thought process that it hits our hard-coded
+#          max_tokens=256 limit before it ever gets a chance to actually output the final message to the user!  
+#        since you want to keep the <think> blocks visible for testing (which is a great idea for debugging the Q-learning actions!), we just need to give the model a much larger token budget so it can finish its thoughts.
+
         generation_jwargs = dict(
             inputs, 
             streamer = streamer,
-            max_new_tokens = 75,
+            max_new_tokens = 2048,
             do_sample = True, # enabel non-greedy decoding, activate temp 
             temperature = 0.7,
             top_p = 0.9, # only considers tokens within the top 90% cumulative prob mass

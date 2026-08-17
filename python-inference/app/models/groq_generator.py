@@ -10,6 +10,11 @@ class GroqGenerator:
         print("Nural Engine - Initialized groq API client ")
         self.client = Groq()
         self.model_id = "qwen/qwen3.6-27b"
+
+        # Now we use for testing 2- A model with showcasing the  qwen/qwen3.6-27b
+        #  Before it answers, it actually "thinks" out loud and outputs its entire 
+        #  internal reasoning process inside those <think> ... </think> tags!
+
         print("Nural engine - Groq client Redy")
     
     def generate_bump_profile(self, raw_history:str) ->str:
